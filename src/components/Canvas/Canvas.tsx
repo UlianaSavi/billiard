@@ -1,6 +1,11 @@
 import { useRef, useEffect } from 'react';
 import './Canvas.css';
-import { CANVAS_STANDART_CIRCLE_SIZE, CANVAS_STANDART_WIDTH, CIRCLES_COUNT } from '../../constants';
+import {
+  CANVAS_STANDART_CIRCLE_SIZE,
+  CANVAS_STANDART_HEIGHT,
+  CANVAS_STANDART_WIDTH,
+  CIRCLES_COUNT
+} from '../../constants';
 import { getRandomColor } from '../../utils';
 
 export const Canvas = () => {
@@ -12,6 +17,7 @@ export const Canvas = () => {
 
     if (canvas) {
       canvas.width = CANVAS_STANDART_WIDTH;
+      canvas.height = CANVAS_STANDART_HEIGHT;
       const ctx = canvas.getContext('2d');
       if (ctx) {
         const x = 40;
@@ -33,24 +39,47 @@ export const Canvas = () => {
     const offsetY = y - 7;
     const firstRow = 4;
     const secondRow = 7;
+    const thirdRow = 11;
+    const fourRow = 13;
     for (let i = 0; i < circleCount; i++) {
-      // Draw circle
+      // Find circle position and draw circle
       ctx.beginPath();
       if (n <= firstRow) {
-        ctx.arc(x + offsetX * n, y, radius, 0, 2 * Math.PI, false);
+        ctx.arc(x, y + offsetY * n, radius, 0, 2 * Math.PI, false);
       }
       if (n >= firstRow && n <= secondRow) {
-        ctx.arc(x + (offsetX * (n - firstRow) + x / 2), y + offsetY, radius, 0, 2 * Math.PI, false);
+        ctx.arc(x + offsetX, y + (offsetY * (n - firstRow) + x / 2), radius, 0, 2 * Math.PI, false);
       }
-      if (n >= secondRow && n <= 11) {
-        ctx.arc(x + (offsetX * (n - firstRow) + x / 2), y + offsetY, radius, 0, 2 * Math.PI, false);
+      if (n > secondRow && n < thirdRow) {
+        ctx.arc(
+          x + offsetX + offsetX,
+          y + (offsetY * (n - secondRow - 0.5) + x / 2),
+          radius,
+          0,
+          2 * Math.PI,
+          false
+        );
       }
-      // if (n <= 13) {
-      //   ctx.arc(x + offsetX, y + y * n, radius, 0, 2 * Math.PI, false);
-      // }
-      // if (n > 13) {
-      //   ctx.arc(x + offsetX, y + y * n, radius, 0, 2 * Math.PI, false);
-      // }
+      if (n > thirdRow && n <= fourRow) {
+        ctx.arc(
+          x + offsetX + offsetX + offsetX,
+          y + (offsetY * (n - thirdRow) + x / 2),
+          radius,
+          0,
+          2 * Math.PI,
+          false
+        );
+      }
+      if (n > fourRow) {
+        ctx.arc(
+          x + offsetX + offsetX + offsetX + offsetX,
+          y + (offsetY * (n - fourRow) + x),
+          radius,
+          0,
+          2 * Math.PI,
+          false
+        );
+      }
       ctx.fillStyle = getRandomColor();
       ctx.fill();
 
