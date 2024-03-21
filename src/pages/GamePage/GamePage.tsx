@@ -1,11 +1,10 @@
-import { Canvas } from "../../components/Canvas";
+import { Canvas } from '../../components/Canvas';
 
 export const GamePage = () => {
-
-return (
+  return (
     <div className="home">
       <p>Title</p>
       <Canvas></Canvas>
     </div>
   );
-}
+};

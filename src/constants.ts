@@ -1,4 +1,4 @@
 export enum ROUTES {
-    empty = '/',
-    game = '/game',
-  }
+  empty = '/',
+  game = '/game'
+}
