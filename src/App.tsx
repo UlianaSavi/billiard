@@ -12,7 +12,7 @@ export const App = () => {
   return (
     <div className="App container">
       <header className="header">
-        <h3 className="title">Service for work with Valantis API</h3>
+        <h3 className="title">Billiard</h3>
       </header>
 
       <Router>
