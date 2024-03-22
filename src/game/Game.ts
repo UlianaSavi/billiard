@@ -30,8 +30,8 @@ export class Game {
         const ball: Ball = {
           x: 0,
           y: 0,
-          vx: CANVAS_STANDART_X_VELOSITY,
-          vy: CANVAS_STANDART_Y_VELOSITY,
+          vx: CANVAS_STANDART_X_VELOSITY + Number(String(Math.random()).slice(0, 3)),
+          vy: CANVAS_STANDART_Y_VELOSITY + Number(String(Math.random()).slice(0, 3)),
           radius: radius,
           color: '',
           draw: function () {
@@ -155,10 +155,45 @@ export class Game {
     return res;
   };
 
+  private checkCollisionWithBalls = (
+    ballHitting: Ball
+  ): { ballHitedIdx: number | null; BallHitting: Ball | null } => {
+    const res: { ballHitedIdx: number | null; BallHitting: Ball } = {
+      ballHitedIdx: null, // the ball that was hit
+      BallHitting: ballHitting // the ball that hit another ball
+    };
+    this.balls.forEach((ball, i) => {
+      const xMax = ball.x + 15;
+      const xMin = ball.x - 15;
+      const yMax = ball.y + 15;
+      const yMin = ball.y - 15;
+      if (
+        ballHitting.x >= xMin &&
+        ballHitting.x <= xMax &&
+        ballHitting.y >= yMin &&
+        ballHitting.y <= yMax
+      ) {
+        res.ballHitedIdx = i;
+      }
+    });
+    return res;
+  };
+
   private animate = (hitBallNum: number) => {
+    // TODO: доделать столкновение шаров с друг другом
+    // this.balls.forEach((ball) => {
+    //   const collisionWithBalls = this.checkCollisionWithBalls(ball);
+    //   if (collisionWithBalls.ballHitedIdx !== null) {
+    //     this.balls[collisionWithBalls.ballHitedIdx].vx = ball.vx * 0.5;
+    //     this.balls[collisionWithBalls.ballHitedIdx].vy = ball.vy * 0.5;
+
+    //     this.balls[collisionWithBalls.ballHitedIdx].x += ball.vx;
+    //     this.balls[collisionWithBalls.ballHitedIdx].y += ball.vy;
+    //   }
+    // });
     if (this.canvas) {
       const ctx = this.canvas.getContext('2d');
-      // Сheck if the ball does not go beyond the table
+      // check if the ball does not go beyond the table
       if (
         this.balls[hitBallNum].y + this.balls[hitBallNum].vy > this.canvas.height ||
         this.balls[hitBallNum].y + this.balls[hitBallNum].vy < 0
