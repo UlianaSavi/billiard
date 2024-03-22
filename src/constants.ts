@@ -17,3 +17,8 @@ export type Ball = {
   color: string;
   draw: () => void;
 };
+
+export type Position = {
+  x: number;
+  y: number;
+};

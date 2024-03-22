@@ -3,13 +3,13 @@ import {
   CANVAS_STANDART_CIRCLE_SIZE,
   CANVAS_STANDART_HEIGHT,
   CANVAS_STANDART_WIDTH,
-  CIRCLES_COUNT
+  CIRCLES_COUNT,
+  Position
 } from '../constants';
 import { getRandomColor } from '../utils';
 
 export class Game {
   private canvas: HTMLCanvasElement | null = null;
-  private bacgroundCanvas: HTMLCanvasElement | null = null;
   private balls: Ball[] = [];
   private raf = 0;
 
@@ -103,12 +103,8 @@ export class Game {
     }
   };
 
-  public initGame = (
-    canvas: HTMLCanvasElement | null,
-    bacgroundCanvas: HTMLCanvasElement | null
-  ) => {
+  public initGame = (canvas: HTMLCanvasElement | null) => {
     this.canvas = canvas;
-    this.bacgroundCanvas = bacgroundCanvas;
     if (this.canvas) {
       this.canvas.width = CANVAS_STANDART_WIDTH;
       this.canvas.height = CANVAS_STANDART_HEIGHT;
@@ -117,54 +113,74 @@ export class Game {
         const x = 40;
         const y = CANVAS_STANDART_HEIGHT / 3; // Centered
 
-        this.drawBorder();
         this.balls = [];
         this.drawBallsTriangle(CIRCLES_COUNT, x, y, CANVAS_STANDART_CIRCLE_SIZE);
 
-        this.canvas.addEventListener('mouseover', (e) => {
-          this.raf = window.requestAnimationFrame(this.animate);
+        let hitBallNum: number | null = null;
+        this.canvas.addEventListener('click', (e) => {
+          const pos = this.getMousePosition(e);
+          hitBallNum = this.checkIsBallClicked(pos);
+          if (hitBallNum) {
+            this.raf = window.requestAnimationFrame(() => this.animate(hitBallNum as number));
+          }
         });
 
         this.canvas.addEventListener('mouseout', (e) => {
           window.cancelAnimationFrame(this.raf);
         });
 
-        this.balls[0].draw();
+        if (hitBallNum && this.balls[hitBallNum]) {
+          this.balls[hitBallNum].draw();
+        }
       }
     }
   };
 
-  private drawBorder = () => {
-    const ctx = this.bacgroundCanvas?.getContext('2d');
-    if (ctx && this.bacgroundCanvas) {
-      ctx.strokeStyle = '#3a3d01';
-      ctx.strokeRect(5, 5, this.bacgroundCanvas.width - 10, this.bacgroundCanvas.height - 10);
-    }
+  private getMousePosition = (event: MouseEvent): Position => {
+    const rect = this.canvas?.getBoundingClientRect();
+    const x = event.clientX - (rect?.left || 0);
+    const y = event.clientY - (rect?.top || 0);
+    return { x: x, y: y };
   };
 
-  private animate = () => {
+  private checkIsBallClicked = (pos: Position): number | null => {
+    let res = null;
+    this.balls.forEach((ball, i) => {
+      const xMax = ball.x + 15;
+      const xMin = ball.x - 15;
+      const yMax = ball.y + 15;
+      const yMin = ball.y - 15;
+      if (pos.x >= xMin && pos.x <= xMax && pos.y >= yMin && pos.y <= yMax) {
+        console.log(1, i);
+        res = i;
+      }
+    });
+    return res;
+  };
+
+  private animate = (hitBallNum: number) => {
     if (this.canvas) {
       const ctx = this.canvas.getContext('2d');
       // Сheck if the ball does not go beyond the table
       if (
-        this.balls[0].y + this.balls[0].vy > this.canvas.height ||
-        this.balls[0].y + this.balls[0].vy < 0
+        this.balls[hitBallNum].y + this.balls[hitBallNum].vy > this.canvas.height ||
+        this.balls[hitBallNum].y + this.balls[hitBallNum].vy < 0
       ) {
-        this.balls[0].vy = -this.balls[0].vy;
+        this.balls[hitBallNum].vy = -this.balls[hitBallNum].vy;
       }
       if (
-        this.balls[0].x + this.balls[0].vx > this.canvas.width ||
-        this.balls[0].x + this.balls[0].vx < 0
+        this.balls[hitBallNum].x + this.balls[hitBallNum].vx > this.canvas.width ||
+        this.balls[hitBallNum].x + this.balls[hitBallNum].vx < 0
       ) {
-        this.balls[0].vx = -this.balls[0].vx;
+        this.balls[hitBallNum].vx = -this.balls[hitBallNum].vx;
       }
       if (ctx) {
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.balls[0].draw();
-        this.balls[0].x += this.balls[0].vx;
-        this.balls[0].y += this.balls[0].vy;
+        this.balls[hitBallNum].draw();
+        this.balls[hitBallNum].x += this.balls[hitBallNum].vx;
+        this.balls[hitBallNum].y += this.balls[hitBallNum].vy;
       }
-      this.raf = window.requestAnimationFrame(this.animate);
+      this.raf = window.requestAnimationFrame(() => this.animate(hitBallNum as number));
     }
   };
 }
