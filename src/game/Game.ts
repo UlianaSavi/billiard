@@ -17,7 +17,7 @@ export class Game {
     const offsetX = CANVAS_STANDART_CIRCLE_SIZE * 2.2;
     const offsetY = CANVAS_STANDART_CIRCLE_SIZE * 2.2;
     const firstRow = 4;
-    const secondRow = 7;
+    const secondRow = 8;
     const thirdRow = 11;
     const fourRow = 13;
     let n = 0;
@@ -37,19 +37,12 @@ export class Game {
           ball.x = x;
           ball.y = y + offsetY * n;
         }
-        if (n >= firstRow && n <= secondRow) {
-          ctx.arc(
-            x + offsetX,
-            y + (offsetY * (n - firstRow - 0.4) + x / 2),
-            radius,
-            0,
-            2 * Math.PI,
-            false
-          );
+        if (n > firstRow && n <= secondRow) {
+          ctx.arc(x + offsetX, y + offsetY * (n - firstRow - 0.4), radius, 0, 2 * Math.PI, false);
           ball.x = x + offsetX;
           ball.y = y + (offsetY * (n - firstRow - 0.4) + x / 2);
         }
-        if (n > secondRow && n < thirdRow) {
+        if (n > secondRow && n <= thirdRow) {
           ctx.arc(
             x + offsetX + offsetX,
             y + (offsetY * (n - secondRow - 0.8) + x / 2),
