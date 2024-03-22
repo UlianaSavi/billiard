@@ -11,8 +11,9 @@ export class Game {
   private canvas: HTMLCanvasElement | null = null;
   private bacgroundCanvas: HTMLCanvasElement | null = null;
   private balls: Ball[] = [];
+  private raf = 0;
 
-  private createCircle = (circleCount: number, x: number, y: number, radius: number) => {
+  private drawBallsTriangle = (circleCount: number, x: number, y: number, radius: number) => {
     const ctx = this.canvas?.getContext('2d');
     const offsetX = CANVAS_STANDART_CIRCLE_SIZE * 2.2;
     const offsetY = CANVAS_STANDART_CIRCLE_SIZE * 2.2;
@@ -27,15 +28,23 @@ export class Game {
         const ball: Ball = {
           x: 0,
           y: 0,
+          vx: 0.2,
+          vy: 0.5,
           radius: radius,
-          color: ''
+          color: '',
+          draw: function () {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
+            ctx.fillStyle = color;
+            ctx.fill();
+          }
         };
         // Find circle position and draw circle
         ctx.beginPath();
         if (n <= firstRow) {
-          ctx.arc(x, y + offsetY * n, radius, 0, 2 * Math.PI, false);
           ball.x = x;
           ball.y = y + offsetY * n;
+          ctx.arc(x, y + offsetY * n, radius, 0, 2 * Math.PI, false);
         }
         if (n > firstRow && n <= secondRow) {
           ctx.arc(x + offsetX, y + offsetY * (n - firstRow - 0.4), radius, 0, 2 * Math.PI, false);
@@ -110,25 +119,52 @@ export class Game {
 
         this.drawBorder();
         this.balls = [];
-        this.createCircle(CIRCLES_COUNT, x, y, CANVAS_STANDART_CIRCLE_SIZE);
-        console.log(this.balls);
-        window.requestAnimationFrame(this.animate);
+        this.drawBallsTriangle(CIRCLES_COUNT, x, y, CANVAS_STANDART_CIRCLE_SIZE);
+
+        this.canvas.addEventListener('mouseover', (e) => {
+          this.raf = window.requestAnimationFrame(this.animate);
+        });
+
+        this.canvas.addEventListener('mouseout', (e) => {
+          window.cancelAnimationFrame(this.raf);
+        });
+
+        this.balls[0].draw();
       }
     }
   };
 
-  private drawBorder() {
+  private drawBorder = () => {
     const ctx = this.bacgroundCanvas?.getContext('2d');
     if (ctx && this.bacgroundCanvas) {
       ctx.strokeStyle = '#3a3d01';
       ctx.strokeRect(5, 5, this.bacgroundCanvas.width - 10, this.bacgroundCanvas.height - 10);
     }
-  }
+  };
 
   private animate = () => {
-    const ctx = this.canvas?.getContext('2d');
-    if (ctx) {
-      ctx.translate(150, 150);
+    if (this.canvas) {
+      const ctx = this.canvas.getContext('2d');
+      // Сheck if the ball does not go beyond the table
+      if (
+        this.balls[0].y + this.balls[0].vy > this.canvas.height ||
+        this.balls[0].y + this.balls[0].vy < 0
+      ) {
+        this.balls[0].vy = -this.balls[0].vy;
+      }
+      if (
+        this.balls[0].x + this.balls[0].vx > this.canvas.width ||
+        this.balls[0].x + this.balls[0].vx < 0
+      ) {
+        this.balls[0].vx = -this.balls[0].vx;
+      }
+      if (ctx) {
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.balls[0].draw();
+        this.balls[0].x += this.balls[0].vx;
+        this.balls[0].y += this.balls[0].vy;
+      }
+      this.raf = window.requestAnimationFrame(this.animate);
     }
   };
 }

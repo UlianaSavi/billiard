@@ -11,6 +11,9 @@ export const CANVAS_STANDART_CIRCLE_SIZE = 10;
 export type Ball = {
   x: number;
   y: number;
+  vx: number;
+  vy: number;
   radius: number;
   color: string;
+  draw: () => void;
 };
