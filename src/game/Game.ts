@@ -3,6 +3,8 @@ import {
   CANVAS_STANDART_CIRCLE_SIZE,
   CANVAS_STANDART_HEIGHT,
   CANVAS_STANDART_WIDTH,
+  CANVAS_STANDART_X_VELOSITY,
+  CANVAS_STANDART_Y_VELOSITY,
   CIRCLES_COUNT,
   Position
 } from '../constants';
@@ -28,8 +30,8 @@ export class Game {
         const ball: Ball = {
           x: 0,
           y: 0,
-          vx: 0.2,
-          vy: 0.5,
+          vx: CANVAS_STANDART_X_VELOSITY,
+          vy: CANVAS_STANDART_Y_VELOSITY,
           radius: radius,
           color: '',
           draw: function () {
@@ -120,13 +122,9 @@ export class Game {
         this.canvas.addEventListener('click', (e) => {
           const pos = this.getMousePosition(e);
           hitBallNum = this.checkIsBallClicked(pos);
-          if (hitBallNum) {
+          if (hitBallNum !== null) {
             this.raf = window.requestAnimationFrame(() => this.animate(hitBallNum as number));
           }
-        });
-
-        this.canvas.addEventListener('mouseout', (e) => {
-          window.cancelAnimationFrame(this.raf);
         });
 
         if (hitBallNum && this.balls[hitBallNum]) {
@@ -151,7 +149,6 @@ export class Game {
       const yMax = ball.y + 15;
       const yMin = ball.y - 15;
       if (pos.x >= xMin && pos.x <= xMax && pos.y >= yMin && pos.y <= yMax) {
-        console.log(1, i);
         res = i;
       }
     });
@@ -166,17 +163,21 @@ export class Game {
         this.balls[hitBallNum].y + this.balls[hitBallNum].vy > this.canvas.height ||
         this.balls[hitBallNum].y + this.balls[hitBallNum].vy < 0
       ) {
+        // change vector of moving (-vy) and do it more slower (* 0.5)
         this.balls[hitBallNum].vy = -this.balls[hitBallNum].vy;
+        this.balls[hitBallNum].vy = this.balls[hitBallNum].vy * 0.5;
       }
       if (
         this.balls[hitBallNum].x + this.balls[hitBallNum].vx > this.canvas.width ||
         this.balls[hitBallNum].x + this.balls[hitBallNum].vx < 0
       ) {
+        // change vector of moving (-vx) and do it more slower (* 0.5)
         this.balls[hitBallNum].vx = -this.balls[hitBallNum].vx;
+        this.balls[hitBallNum].vx = this.balls[hitBallNum].vx * 0.5;
       }
       if (ctx) {
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.balls[hitBallNum].draw();
+        this.balls.forEach((ball) => ball.draw());
         this.balls[hitBallNum].x += this.balls[hitBallNum].vx;
         this.balls[hitBallNum].y += this.balls[hitBallNum].vy;
       }
