@@ -16,96 +16,6 @@ export class Game {
   private balls: Ball[] = [];
   private raf = 0;
 
-  private drawBallsTriangle = (circleCount: number, x: number, y: number, radius: number) => {
-    const ctx = this.canvas?.getContext('2d');
-    const offsetX = STANDART_CIRCLE_SIZE * 2.2;
-    const offsetY = STANDART_CIRCLE_SIZE * 2.2;
-    const firstRow = 4;
-    const secondRow = 8;
-    const thirdRow = 11;
-    const fourRow = 13;
-    let n = 0;
-    if (ctx) {
-      for (let i = 0; i < circleCount; i++) {
-        // create a new Ball object
-        const ball: Ball = {
-          x: 0,
-          y: 0,
-          vx: STANDART_X_VELOSITY + Number(String(Math.random()).slice(0, 3)), // standart velosity + random number rounded to decimals
-          vy: STANDART_Y_VELOSITY,
-          radius: radius,
-          color: '',
-          draw: function () {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
-            ctx.fillStyle = color;
-            ctx.fill();
-          }
-        };
-        // Find circle position and draw circle
-        ctx.beginPath();
-        if (n <= firstRow) {
-          ball.x = x;
-          ball.y = y + offsetY * n;
-          ctx.arc(x, y + offsetY * n, radius, 0, 2 * Math.PI, false);
-        }
-        if (n > firstRow && n <= secondRow) {
-          ctx.arc(x + offsetX, y + offsetY * (n - firstRow - 0.4), radius, 0, 2 * Math.PI, false);
-          ball.x = x + offsetX;
-          ball.y = y + (offsetY * (n - firstRow - 0.4) + x / 2);
-        }
-        if (n > secondRow && n <= thirdRow) {
-          ctx.arc(
-            x + offsetX + offsetX,
-            y + (offsetY * (n - secondRow - 0.8) + x / 2),
-            radius,
-            0,
-            2 * Math.PI,
-            false
-          );
-          ball.x = x + offsetX + offsetX;
-          ball.y = y + (offsetY * (n - secondRow - 0.8) + x / 2);
-        }
-        if (n > thirdRow && n <= fourRow) {
-          ctx.arc(
-            x + offsetX + offsetX + offsetX,
-            y + (offsetY * (n - thirdRow - 0.3) + x / 2),
-            radius,
-            0,
-            2 * Math.PI,
-            false
-          );
-          ball.x = x + offsetX + offsetX + offsetX;
-          ball.y = y + (offsetY * (n - thirdRow - 0.3) + x / 2);
-        }
-        if (n > fourRow) {
-          ctx.arc(
-            x + offsetX + offsetX + offsetX + offsetX,
-            y + (offsetY * (n - fourRow - 0.6) + x),
-            radius,
-            0,
-            2 * Math.PI,
-            false
-          );
-          ball.x = x + offsetX + offsetX + offsetX + offsetX;
-          ball.y = y + (offsetY * (n - fourRow - 0.6) + x);
-        }
-        const color = getRandomColor();
-        ball.color = color;
-        ctx.fillStyle = color;
-        ctx.fill();
-
-        // Add shadow
-        ctx.shadowColor = '#00000029';
-        ctx.shadowBlur = 2;
-        ctx.shadowOffsetX = 2;
-
-        n = n + 1;
-        this.balls.push(ball);
-      }
-    }
-  };
-
   public initGame = (canvas: HTMLCanvasElement | null) => {
     this.canvas = canvas;
     if (this.canvas) {
@@ -202,6 +112,96 @@ export class Game {
         }
       }
       this.raf = window.requestAnimationFrame(() => this.animate(hitBallNum as number));
+    }
+  };
+
+  private drawBallsTriangle = (circleCount: number, x: number, y: number, radius: number) => {
+    const ctx = this.canvas?.getContext('2d');
+    const offsetX = STANDART_CIRCLE_SIZE * 2.2;
+    const offsetY = STANDART_CIRCLE_SIZE * 2.2;
+    const firstRow = 4;
+    const secondRow = 8;
+    const thirdRow = 11;
+    const fourRow = 13;
+    let n = 0;
+    if (ctx) {
+      for (let i = 0; i < circleCount; i++) {
+        // create a new Ball object
+        const ball: Ball = {
+          x: 0,
+          y: 0,
+          vx: STANDART_X_VELOSITY + Number(String(Math.random()).slice(0, 3)), // standart velosity + random number rounded to decimals
+          vy: STANDART_Y_VELOSITY,
+          radius: radius,
+          color: '',
+          draw: function () {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
+            ctx.fillStyle = color;
+            ctx.fill();
+          }
+        };
+        // Find circle position and draw circle
+        ctx.beginPath();
+        if (n <= firstRow) {
+          ball.x = x;
+          ball.y = y + offsetY * n;
+          ctx.arc(x, y + offsetY * n, radius, 0, 2 * Math.PI, false);
+        }
+        if (n > firstRow && n <= secondRow) {
+          ctx.arc(x + offsetX, y + offsetY * (n - firstRow - 0.4), radius, 0, 2 * Math.PI, false);
+          ball.x = x + offsetX;
+          ball.y = y + (offsetY * (n - firstRow - 0.4) + x / 2);
+        }
+        if (n > secondRow && n <= thirdRow) {
+          ctx.arc(
+            x + offsetX + offsetX,
+            y + (offsetY * (n - secondRow - 0.8) + x / 2),
+            radius,
+            0,
+            2 * Math.PI,
+            false
+          );
+          ball.x = x + offsetX + offsetX;
+          ball.y = y + (offsetY * (n - secondRow - 0.8) + x / 2);
+        }
+        if (n > thirdRow && n <= fourRow) {
+          ctx.arc(
+            x + offsetX + offsetX + offsetX,
+            y + (offsetY * (n - thirdRow - 0.3) + x / 2),
+            radius,
+            0,
+            2 * Math.PI,
+            false
+          );
+          ball.x = x + offsetX + offsetX + offsetX;
+          ball.y = y + (offsetY * (n - thirdRow - 0.3) + x / 2);
+        }
+        if (n > fourRow) {
+          ctx.arc(
+            x + offsetX + offsetX + offsetX + offsetX,
+            y + (offsetY * (n - fourRow - 0.6) + x),
+            radius,
+            0,
+            2 * Math.PI,
+            false
+          );
+          ball.x = x + offsetX + offsetX + offsetX + offsetX;
+          ball.y = y + (offsetY * (n - fourRow - 0.6) + x);
+        }
+        const color = getRandomColor();
+        ball.color = color;
+        ctx.fillStyle = color;
+        ctx.fill();
+
+        // Add shadow
+        ctx.shadowColor = '#00000029';
+        ctx.shadowBlur = 2;
+        ctx.shadowOffsetX = 2;
+
+        n = n + 1;
+        this.balls.push(ball);
+      }
     }
   };
 
