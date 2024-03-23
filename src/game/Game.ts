@@ -6,6 +6,7 @@ import {
   CANVAS_STANDART_X_VELOSITY,
   CANVAS_STANDART_Y_VELOSITY,
   CIRCLES_COUNT,
+  CollisionWithTableBorder,
   Position
 } from '../constants';
 import { getRandomColor } from '../utils';
@@ -30,8 +31,8 @@ export class Game {
         const ball: Ball = {
           x: 0,
           y: 0,
-          vx: CANVAS_STANDART_X_VELOSITY + Number(String(Math.random()).slice(0, 3)),
-          vy: CANVAS_STANDART_Y_VELOSITY + Number(String(Math.random()).slice(0, 3)),
+          vx: CANVAS_STANDART_X_VELOSITY + Number(String(Math.random()).slice(0, 3)), // standart velosity + random number rounded to decimals
+          vy: CANVAS_STANDART_Y_VELOSITY,
           radius: radius,
           color: '',
           draw: function () {
@@ -126,10 +127,6 @@ export class Game {
             this.raf = window.requestAnimationFrame(() => this.animate(hitBallNum as number));
           }
         });
-
-        if (hitBallNum && this.balls[hitBallNum]) {
-          this.balls[hitBallNum].draw();
-        }
       }
     }
   };
@@ -155,68 +152,93 @@ export class Game {
     return res;
   };
 
-  private checkCollisionWithBalls = (
-    ballHitting: Ball
-  ): { ballHitedIdx: number | null; BallHitting: Ball | null } => {
-    const res: { ballHitedIdx: number | null; BallHitting: Ball } = {
-      ballHitedIdx: null, // the ball that was hit
-      BallHitting: ballHitting // the ball that hit another ball
-    };
-    this.balls.forEach((ball, i) => {
-      const xMax = ball.x + 15;
-      const xMin = ball.x - 15;
-      const yMax = ball.y + 15;
-      const yMin = ball.y - 15;
-      if (
-        ballHitting.x >= xMin &&
-        ballHitting.x <= xMax &&
-        ballHitting.y >= yMin &&
-        ballHitting.y <= yMax
-      ) {
-        res.ballHitedIdx = i;
+  private checkCollisionWithBalls = (ballHittingIdx: number, ballHitting: Ball): number | null => {
+    let res: number | null = null;
+    this.balls.map((ballInArr, i) => {
+      const dx = ballHitting.x - ballInArr.x;
+      const dy = ballHitting.y - ballInArr.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      const colliding = distance < ballHitting.radius + ballInArr.radius;
+      if (colliding && i !== ballHittingIdx) {
+        res = i;
       }
     });
     return res;
   };
 
   private animate = (hitBallNum: number) => {
-    // TODO: доделать столкновение шаров с друг другом
-    // this.balls.forEach((ball) => {
-    //   const collisionWithBalls = this.checkCollisionWithBalls(ball);
-    //   if (collisionWithBalls.ballHitedIdx !== null) {
-    //     this.balls[collisionWithBalls.ballHitedIdx].vx = ball.vx * 0.5;
-    //     this.balls[collisionWithBalls.ballHitedIdx].vy = ball.vy * 0.5;
-
-    //     this.balls[collisionWithBalls.ballHitedIdx].x += ball.vx;
-    //     this.balls[collisionWithBalls.ballHitedIdx].y += ball.vy;
-    //   }
-    // });
     if (this.canvas) {
       const ctx = this.canvas.getContext('2d');
-      // check if the ball does not go beyond the table
-      if (
-        this.balls[hitBallNum].y + this.balls[hitBallNum].vy > this.canvas.height ||
-        this.balls[hitBallNum].y + this.balls[hitBallNum].vy < 0
-      ) {
-        // change vector of moving (-vy) and do it more slower (* 0.5)
-        this.balls[hitBallNum].vy = -this.balls[hitBallNum].vy;
-        this.balls[hitBallNum].vy = this.balls[hitBallNum].vy * 0.5;
-      }
-      if (
-        this.balls[hitBallNum].x + this.balls[hitBallNum].vx > this.canvas.width ||
-        this.balls[hitBallNum].x + this.balls[hitBallNum].vx < 0
-      ) {
-        // change vector of moving (-vx) and do it more slower (* 0.5)
-        this.balls[hitBallNum].vx = -this.balls[hitBallNum].vx;
-        this.balls[hitBallNum].vx = this.balls[hitBallNum].vx * 0.5;
-      }
       if (ctx) {
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.balls.forEach((ball) => ball.draw());
+
+        this.balls.forEach((ballInArr, i) => {
+          const ballHitedIdx = this.checkCollisionWithBalls(i, ballInArr);
+          const collisionWithTableBorder = this.checkCollisionWithTableBorder(ballInArr);
+
+          // Add velocity for hitted balls and make slower the ball that hit another ball
+          if (ballHitedIdx !== null) {
+            this.balls[ballHitedIdx].vx = -this.balls[ballHitedIdx].vx;
+            this.balls[ballHitedIdx].vx = this.balls[ballHitedIdx].vx *= 0.8;
+            this.balls[ballHitedIdx].vy = -this.balls[ballHitedIdx].vy;
+            this.balls[ballHitedIdx].vy = this.balls[ballHitedIdx].vy *= 0.8;
+
+            this.balls[i].vx = -this.balls[i].vx;
+            this.balls[i].vx = this.balls[i].vx *= 0.8;
+            this.balls[i].vy = -this.balls[i].vy;
+            this.balls[i].vy = this.balls[i].vy *= 0.8;
+          }
+
+          if (collisionWithTableBorder === CollisionWithTableBorder.onY) {
+            // change vector of moving (-vy) and do it more slower (* 0.5)
+            ballInArr.vy = -ballInArr.vy;
+            ballInArr.vy = ballInArr.vy * 0.5;
+          }
+          if (collisionWithTableBorder === CollisionWithTableBorder.onX) {
+            // change vector of moving (-vx) and do it more slower (* 0.5)
+            ballInArr.vx = -ballInArr.vx;
+            ballInArr.vx = ballInArr.vx * 0.5;
+          }
+
+          ballInArr.draw();
+
+          // prepare for the next frame
+          if (ballHitedIdx !== null) {
+            if (Math.sign(this.balls[ballHitedIdx].vx) === -1) {
+              this.balls[ballHitedIdx as number].vx = CANVAS_STANDART_X_VELOSITY;
+            }
+            if (Math.sign(this.balls[ballHitedIdx].vy) === -1) {
+              this.balls[ballHitedIdx as number].vy = CANVAS_STANDART_X_VELOSITY;
+            }
+
+            this.balls[ballHitedIdx].x += this.balls[ballHitedIdx].vx;
+            this.balls[ballHitedIdx].y += this.balls[ballHitedIdx].vy;
+
+            this.balls[i].x += this.balls[i].vx;
+            this.balls[i].y += this.balls[i].vy;
+          }
+        });
+
+        // prepare for the next frame
+
         this.balls[hitBallNum].x += this.balls[hitBallNum].vx;
         this.balls[hitBallNum].y += this.balls[hitBallNum].vy;
       }
       this.raf = window.requestAnimationFrame(() => this.animate(hitBallNum as number));
     }
+  };
+
+  private checkCollisionWithTableBorder = (ball: Ball): CollisionWithTableBorder => {
+    if (this.canvas) {
+      // check if the ball does not go beyond the table
+      if (ball.y + ball.vy > this.canvas.height || ball.y + ball.vy < 0) {
+        return CollisionWithTableBorder.onY;
+      }
+      if (ball.x + ball.vx > this.canvas.width || ball.x + ball.vx < 0) {
+        return CollisionWithTableBorder.onX;
+      }
+    }
+    return CollisionWithTableBorder.none;
   };
 }

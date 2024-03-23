@@ -24,3 +24,9 @@ export type Position = {
   x: number;
   y: number;
 };
+
+export enum CollisionWithTableBorder {
+  onY = 'y',
+  onX = 'x',
+  none = 'none'
+}
