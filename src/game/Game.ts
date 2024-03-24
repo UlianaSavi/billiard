@@ -58,24 +58,27 @@ export class Game {
         movingBallsIds.push(hitBallNum);
 
         this.balls.forEach((ballInArr, i) => {
-          const ballHitedIdx = this.checkCollisionWithBalls(i, ballInArr);
+          const ballHitedIdx = this.checkCollisionWithBalls(i, ballInArr); // ball that was hited
 
           if (ballHitedIdx !== null) {
             movingBallsIds.push(i);
             movingBallsIds.push(ballHitedIdx);
 
-            // мяч, который ударился об другой, меняет свое направление на противоположное в следствии удара
-            // a ball that hits another one changes its direction to the opposite as a result of the impact
-            // this.balls[ballHitedIdx].vx = -this.balls[ballHitedIdx].vx;
-            // this.balls[ballHitedIdx].vx = this.balls[ballHitedIdx].vx * 0.5;
-            // this.balls[ballHitedIdx].vy = -this.balls[ballHitedIdx].vy;
-            // this.balls[ballHitedIdx].vy = this.balls[ballHitedIdx].vy * 0.5;
+            // calculated collision logic
 
-            // // мяч, по которому прилетел удар получает часть ускорения от первого мяча и такое же ускорение
-            // this.balls[i].vx = -this.balls[ballHitedIdx].vx;
-            // this.balls[i].vx = this.balls[ballHitedIdx].vx;
-            // this.balls[i].vy = -this.balls[ballHitedIdx].vy;
-            // this.balls[i].vy = this.balls[ballHitedIdx].vy;
+            // мяч, который ударился об другой, меняет свое направление на противоположное в следствии удара и теряет часть ускорения
+            // a ball that hits another one changes its direction to the opposite as a result of the hit and loses half of the acceleration
+            this.balls[i].vx = -this.balls[i].vx;
+            this.balls[i].vx = this.balls[i].vx * 0.5;
+            this.balls[i].vy = -this.balls[i].vy;
+            this.balls[i].vy = this.balls[i].vy * 0.5;
+
+            // мяч, по которому прилетел удар получает часть ускорения от первого мяча и противоположное направление
+            // a ball that was hit receives part of the acceleration from the first ball and the opposite direction
+            // this.balls[ballHitedIdx].vx = -this.balls[i].vx;
+            // this.balls[ballHitedIdx].vx = this.balls[i].vx;
+            // this.balls[ballHitedIdx].vy = -this.balls[i].vy;
+            // this.balls[ballHitedIdx].vy = this.balls[i].vy;
 
             // this.balls[i].x += this.balls[i].vx;
             // this.balls[i].y += this.balls[i].vy;
@@ -84,7 +87,7 @@ export class Game {
           }
         });
 
-        // calculated collision logic
+        // calculated moving logic
         movingBallsIds.forEach((id) => {
           const collisionWithTableBorder = this.checkCollisionWithTableBorder(this.balls[id]);
           if (collisionWithTableBorder === CollisionWithTableBorder.onY) {
@@ -109,7 +112,7 @@ export class Game {
             this.balls[id].y += this.balls[id].vy *= 0.997;
           }
 
-          // increase moving balls velocity for next frame
+          // increase moving balls position for next frame
           this.balls[id].x += this.balls[id].vx;
           this.balls[id].y += this.balls[id].vy;
         });
