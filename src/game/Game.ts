@@ -37,8 +37,7 @@ export class Game {
           if (hitBallNum !== null) {
             // if ball already was stopped before - add a new velosity for it
             if (this.balls[hitBallNum].vx === 0) {
-              this.balls[hitBallNum].vx =
-                STANDART_X_VELOSITY + Number(String(Math.random()).slice(0, 3)) - 0.7;
+              this.balls[hitBallNum].vx = STANDART_X_VELOSITY;
             }
             if (this.balls[hitBallNum].vy === 0) {
               this.balls[hitBallNum].vy = STANDART_Y_VELOSITY;
@@ -137,11 +136,12 @@ export class Game {
     if (ctx) {
       for (let i = 0; i < circleCount; i++) {
         // create a new Ball object
+        const randomVilosity = Number(String(Math.random()).slice(0, 3));
         const ball: Ball = {
           x: 0,
           y: 0,
-          vx: STANDART_X_VELOSITY + Number(String(Math.random()).slice(0, 3)), // standart velosity + random number rounded to decimals
-          vy: STANDART_Y_VELOSITY,
+          vx: STANDART_X_VELOSITY + randomVilosity,
+          vy: STANDART_Y_VELOSITY + randomVilosity,
           radius: radius,
           color: '',
           draw: function () {
@@ -252,7 +252,7 @@ export class Game {
       const dx = ballInArr.x - ballHitting.x;
       const dy = ballInArr.y - ballHitting.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      const colliding = distance <= ballInArr.radius + ballHitting.radius;
+      const colliding = distance <= ballInArr.radius + ballHitting.radius + 0.5;
 
       if (colliding && i !== ballHittingIdx) {
         res.ballHitedIdx = i;
