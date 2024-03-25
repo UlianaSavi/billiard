@@ -1,0 +1,26 @@
+:root {
+  --white: white;
+  --transparent: transparent;
+  --box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  --blackout: rgb(29 29 29 / 80%);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font: 13px / 18px YS Text, Helvetica Neue, Helvetica, Arial, Verdana, sans-serif;
+}
+
+.container {
+  height: 100vh;
+  overflow: hidden;
+}

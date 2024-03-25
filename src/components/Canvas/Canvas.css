@@ -1,0 +1,28 @@
+.stage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 365px;
+    width: 730px;
+    overflow: hidden;
+}
+
+.canvas {
+    position: absolute;
+}
+
+.background {
+    background-image: url('/src/assets/Snooker_table_drawing.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#game-layer {
+    z-index: 2;
+}
+
+#background-layer {
+    z-index: 1;
+    width: 100%;
+}
