@@ -1,6 +1,6 @@
 import {
   Ball,
-  STANDART_CIRCLE_SIZE,
+  STANDART_CIRCLE_RADIUS,
   CANVAS_STANDART_HEIGHT,
   CANVAS_STANDART_WIDTH,
   STANDART_X_VELOSITY,
@@ -25,17 +25,17 @@ export class Game {
       const ctx = this.canvas.getContext('2d');
       if (ctx) {
         const x = 40;
-        const y = CANVAS_STANDART_HEIGHT / 3; // Centered canvas
+        const y = CANVAS_STANDART_HEIGHT / 3; // Centered canvas | оцентрировать холст
 
         this.balls = [];
-        this.drawBallsTriangle(CIRCLES_COUNT, x, y, STANDART_CIRCLE_SIZE);
+        this.drawBallsTriangle(x, y, STANDART_CIRCLE_RADIUS);
 
         let hitBallNum: number | null = null;
         this.canvas.addEventListener('click', (e) => {
-          const pos = this.getMousePosition(e);
-          hitBallNum = this.checkIsBallClicked(pos);
+          hitBallNum = this.checkIsBallClicked(this.getMousePosition(e));
           if (hitBallNum !== null) {
-            // if ball already was stopped before - add a new velosity for it
+            // if ball already was stopped before current click - add a standart velosity for this ball again
+            // если мяч остановился после движение, а по нему опять кликнули - добавить ему стандартную скорость заново
             if (this.balls[hitBallNum].vx === 0) {
               this.balls[hitBallNum].vx = STANDART_X_VELOSITY;
             }
@@ -67,9 +67,9 @@ export class Game {
             movingBallsIds.push(i);
             movingBallsIds.push(collisionWithBallsRes.ballHitedIdx);
 
-            // calculated collision logic
+            // calculating of the collisions | вычисления для столкновений
 
-            // мяч, который ударился об другой, меняет свое направление на противоположное в следствии удара и теряет часть ускорения
+            // шар, который ударился об другой, меняет свое направление на противоположное в следствии удара и теряет часть ускорения
             // a ball that hits another one changes its direction to the opposite as a result of the hit and loses half of the acceleration
             const hitedVx = this.balls[i].vx;
             const hitedVy = this.balls[i].vy;
@@ -79,41 +79,41 @@ export class Game {
             this.balls[i].vy += -hitedVy;
             this.balls[i].vy += hitedVy * 0.5;
 
-            // мяч, по которому прилетел удар получает часть ускорения от первого мяча и противоположное направление
+            // шар, по которому прилетел удар получает часть ускорения от первого шара и противоположное направление
             // a ball that was hit receives part of the acceleration from the first ball and the opposite direction
             this.balls[collisionWithBallsRes.ballHitedIdx].vx += -hitedVx * 0.5;
             this.balls[collisionWithBallsRes.ballHitedIdx].vy += -hitedVy * 0.5;
-
-            // TODO: шары когда на друг друга залазиют - все ломается
           }
         });
 
-        // calculated moving logic
+        // calculating for the moving balls | вычисления для движущихся шаров
         movingBallsIds.forEach((id) => {
           const collisionWithTableBorder = this.checkCollisionWithTableBorder(this.balls[id]);
           if (collisionWithTableBorder === CollisionWithTableBorder.onY) {
             // change vector of moving (-vy) and do it more slower (* 0.5)
+            // заменить на противоположный вектор перемещения (-vy) и уменьшить скорость (* 0.5)
             this.balls[id].vy = -this.balls[id].vy;
             this.balls[id].vy = this.balls[id].vy * 0.5;
           }
           if (collisionWithTableBorder === CollisionWithTableBorder.onX) {
             // change vector of moving (-vx) and do it more slower (* 0.5)
+            // заменить на противоположный вектор перемещения (-vx) и уменьшить скорость (* 0.5)
             this.balls[id].vx = -this.balls[id].vx;
             this.balls[id].vx = this.balls[id].vx * 0.5;
           }
 
-          // prepare for the next frame
-          // if ball is too slow - stop it
+          // подготовка к след. кадру | prepare for the next frame
+          // if ball is too slow - stop it | если шар слишком медленный - остановить его
           if (this.balls[id].vx <= 0.03 && this.balls[id].vx >= -0.03) {
             this.balls[id].vx = 0;
             this.balls[id].vy = 0;
           } else {
-            // do velisity slower every frame (friction)
+            // do velisity slower every frame (friction) | уменьшить скорость движущегося шара для кажд. след. кадра (трение)
             this.balls[id].x += this.balls[id].vx *= 0.997;
             this.balls[id].y += this.balls[id].vy *= 0.997;
           }
 
-          // increase moving balls position for next frame
+          // moving the ball on the velocity vector  | перемещение шара на вектор скорости
           this.balls[id].x += this.balls[id].vx;
           this.balls[id].y += this.balls[id].vy;
         });
@@ -124,18 +124,19 @@ export class Game {
     }
   };
 
-  private drawBallsTriangle = (circleCount: number, x: number, y: number, radius: number) => {
+  // draws balls (15x) as billiard triangle | рисует шары (15шт) в форме бильярдного треугольника
+  private drawBallsTriangle = (x: number, y: number, radius: number) => {
     const ctx = this.canvas?.getContext('2d');
-    const offsetX = STANDART_CIRCLE_SIZE * 2.2;
-    const offsetY = STANDART_CIRCLE_SIZE * 2.2;
+    const offsetX = STANDART_CIRCLE_RADIUS * 2.2;
+    const offsetY = STANDART_CIRCLE_RADIUS * 2.2;
     const firstRow = 4;
     const secondRow = 8;
     const thirdRow = 11;
     const fourRow = 13;
     let n = 0;
     if (ctx) {
-      for (let i = 0; i < circleCount; i++) {
-        // create a new Ball object
+      for (let i = 0; i < CIRCLES_COUNT; i++) {
+        // create a new Ball object | создать новый шар
         const randomVilosity = Number(String(Math.random()).slice(0, 3));
         const ball: Ball = {
           x: 0,
@@ -151,7 +152,7 @@ export class Game {
             ctx.fill();
           }
         };
-        // Find circle position and draw circle
+        // calculate ball position and draw ball | вычислить положение шара и написовать его
         ctx.beginPath();
         if (n <= firstRow) {
           ball.x = x;
@@ -204,7 +205,7 @@ export class Game {
         ctx.fillStyle = color;
         ctx.fill();
 
-        // Add shadow
+        // add shadow  | добавить тень
         ctx.shadowColor = '#00000029';
         ctx.shadowBlur = 2;
         ctx.shadowOffsetX = 2;
@@ -215,6 +216,7 @@ export class Game {
     }
   };
 
+  // return mouse pos in x and y | вохвращает позицию мыши по x и y
   private getMousePosition = (event: MouseEvent): Position => {
     const rect = this.canvas?.getBoundingClientRect();
     const x = event.clientX - (rect?.left || 0);
@@ -222,13 +224,15 @@ export class Game {
     return { x: x, y: y };
   };
 
+  // check if ball clicked and if yes - returns it's id
+  //проверяет был ли сделан клик по мячу и если да - возвращает его id
   private checkIsBallClicked = (pos: Position): number | null => {
     let res = null;
     this.balls.forEach((ball, i) => {
-      const xMax = ball.x + 15;
-      const xMin = ball.x - 15;
-      const yMax = ball.y + 15;
-      const yMin = ball.y - 15;
+      const xMax = ball.x + STANDART_CIRCLE_RADIUS;
+      const xMin = ball.x - STANDART_CIRCLE_RADIUS;
+      const yMax = ball.y + STANDART_CIRCLE_RADIUS;
+      const yMin = ball.y - STANDART_CIRCLE_RADIUS;
       if (pos.x >= xMin && pos.x <= xMax && pos.y >= yMin && pos.y <= yMax) {
         res = i;
       }
@@ -236,7 +240,8 @@ export class Game {
     return res;
   };
 
-  // Check if one Ball hit another. Returns ball that was hited id
+  // check if one Ball hit another. Returns ball that was hited id
+  // проверить ударяет ли переданный мяч какой-либо из остальных мячей. Функция возвращает мяч, который был ударен
   private checkCollisionWithBalls = (
     ballHittingIdx: number,
     ballHitting: Ball
@@ -256,16 +261,16 @@ export class Game {
 
       if (colliding && i !== ballHittingIdx) {
         res.ballHitedIdx = i;
-        res.collisionVector.dx = dx; // can be use for calculate vector of moving
+        res.collisionVector.dx = dx; // can be use for calculate vector of moving | можно юзать для вычисления вектора движения после удара
         res.collisionVector.dy = dy;
       }
     });
     return res;
   };
 
+  // check if the ball collides the table | проверить ударяется ли мяч об стол
   private checkCollisionWithTableBorder = (ball: Ball): CollisionWithTableBorder => {
     if (this.canvas) {
-      // check if the ball does not go beyond the table
       if (ball.y + ball.vy > this.canvas.height || ball.y + ball.vy < 0) {
         return CollisionWithTableBorder.onY;
       }

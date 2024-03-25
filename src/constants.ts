@@ -6,7 +6,7 @@ export enum ROUTES {
 export const CIRCLES_COUNT = 15; // standart count for billiard
 export const CANVAS_STANDART_WIDTH = 730;
 export const CANVAS_STANDART_HEIGHT = 365;
-export const STANDART_CIRCLE_SIZE = 10;
+export const STANDART_CIRCLE_RADIUS = 10;
 export const STANDART_X_VELOSITY = 0.4;
 export const STANDART_Y_VELOSITY = 0.6;
 
