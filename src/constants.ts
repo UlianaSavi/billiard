@@ -30,3 +30,8 @@ export enum CollisionWithTableBorder {
   onX = 'x',
   none = 'none'
 }
+
+export interface ICollisionWithBallsRes {
+  ballHitedIdx: number | null;
+  collisionVector: { dx: number; dy: number };
+}

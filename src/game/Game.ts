@@ -7,7 +7,8 @@ import {
   STANDART_Y_VELOSITY,
   CIRCLES_COUNT,
   CollisionWithTableBorder,
-  Position
+  Position,
+  ICollisionWithBallsRes
 } from '../constants';
 import { getRandomColor } from '../utils';
 
@@ -37,7 +38,7 @@ export class Game {
             // if ball already was stopped before - add a new velosity for it
             if (this.balls[hitBallNum].vx === 0) {
               this.balls[hitBallNum].vx =
-                STANDART_X_VELOSITY + Number(String(Math.random()).slice(0, 3)) - 0.5;
+                STANDART_X_VELOSITY + Number(String(Math.random()).slice(0, 3)) - 0.7;
             }
             if (this.balls[hitBallNum].vy === 0) {
               this.balls[hitBallNum].vy = STANDART_Y_VELOSITY;
@@ -58,32 +59,33 @@ export class Game {
         movingBallsIds.push(hitBallNum);
 
         this.balls.forEach((ballInArr, i) => {
-          const ballHitedIdx = this.checkCollisionWithBalls(i, ballInArr); // ball that was hited
+          const collisionWithBallsRes: ICollisionWithBallsRes | null = this.checkCollisionWithBalls(
+            i,
+            ballInArr
+          );
 
-          if (ballHitedIdx !== null) {
+          if (collisionWithBallsRes.ballHitedIdx !== null) {
             movingBallsIds.push(i);
-            movingBallsIds.push(ballHitedIdx);
+            movingBallsIds.push(collisionWithBallsRes.ballHitedIdx);
 
             // calculated collision logic
 
             // мяч, который ударился об другой, меняет свое направление на противоположное в следствии удара и теряет часть ускорения
             // a ball that hits another one changes its direction to the opposite as a result of the hit and loses half of the acceleration
-            this.balls[i].vx = -this.balls[i].vx;
-            this.balls[i].vx = this.balls[i].vx * 0.5;
-            this.balls[i].vy = -this.balls[i].vy;
-            this.balls[i].vy = this.balls[i].vy * 0.5;
+            const hitedVx = this.balls[i].vx;
+            const hitedVy = this.balls[i].vy;
+
+            this.balls[i].vx += -hitedVx;
+            this.balls[i].vx += hitedVx * 0.5;
+            this.balls[i].vy += -hitedVy;
+            this.balls[i].vy += hitedVy * 0.5;
 
             // мяч, по которому прилетел удар получает часть ускорения от первого мяча и противоположное направление
             // a ball that was hit receives part of the acceleration from the first ball and the opposite direction
-            // this.balls[ballHitedIdx].vx = -this.balls[i].vx;
-            // this.balls[ballHitedIdx].vx = this.balls[i].vx;
-            // this.balls[ballHitedIdx].vy = -this.balls[i].vy;
-            // this.balls[ballHitedIdx].vy = this.balls[i].vy;
+            this.balls[collisionWithBallsRes.ballHitedIdx].vx += -hitedVx * 0.5;
+            this.balls[collisionWithBallsRes.ballHitedIdx].vy += -hitedVy * 0.5;
 
-            // this.balls[i].x += this.balls[i].vx;
-            // this.balls[i].y += this.balls[i].vy;
-            // this.balls[ballHitedIdx].x += this.balls[i].vx;
-            // this.balls[ballHitedIdx].y += this.balls[i].vy;
+            // TODO: шары когда на друг друга залазиют - все ломается
           }
         });
 
@@ -235,8 +237,17 @@ export class Game {
   };
 
   // Check if one Ball hit another. Returns ball that was hited id
-  private checkCollisionWithBalls = (ballHittingIdx: number, ballHitting: Ball): number | null => {
-    let res: number | null = null;
+  private checkCollisionWithBalls = (
+    ballHittingIdx: number,
+    ballHitting: Ball
+  ): ICollisionWithBallsRes => {
+    const res: ICollisionWithBallsRes = {
+      ballHitedIdx: null,
+      collisionVector: {
+        dx: 0,
+        dy: 0
+      }
+    };
     this.balls.map((ballInArr, i) => {
       const dx = ballInArr.x - ballHitting.x;
       const dy = ballInArr.y - ballHitting.y;
@@ -244,7 +255,9 @@ export class Game {
       const colliding = distance <= ballInArr.radius + ballHitting.radius;
 
       if (colliding && i !== ballHittingIdx) {
-        res = i;
+        res.ballHitedIdx = i;
+        res.collisionVector.dx = dx; // can be use for calculate vector of moving
+        res.collisionVector.dy = dy;
       }
     });
     return res;
