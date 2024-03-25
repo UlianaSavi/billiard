@@ -1,21 +1,29 @@
+import { useState } from 'react';
 import { Canvas } from '../../components/Canvas';
 import { ColorEditorPopup } from '../../components/ColorEditorPopup';
 import './GamePage.css';
+import { getRandomColor } from '../../utils';
 
 export const GamePage = () => {
-  const openColorEditorPopup = true;
+  const [isOpenPopup, setIsOpenPopup] = useState(false);
+  const [newBallColor, setNewBallColor] = useState(getRandomColor());
   const changeColor = (color: string) => {
-    console.log(123, color);
+    setIsOpenPopup(false);
+    setNewBallColor(color);
+  };
+
+  const onBallClick = (ballClikedId: number) => {
+    setIsOpenPopup(true);
   };
 
   return (
     <>
       <div className="home">
-        {openColorEditorPopup && <ColorEditorPopup changeColor={changeColor} />}
+        {isOpenPopup && <ColorEditorPopup changeColor={changeColor} />}
         <header className="header">
           <h3 className="title">Billiard</h3>
         </header>
-        <Canvas></Canvas>
+        <Canvas onBallClick={onBallClick}></Canvas>
       </div>
     </>
   );

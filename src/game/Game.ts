@@ -49,6 +49,10 @@ export class Game {
     }
   };
 
+  public changeBallColor = (color: string, id: number) => {
+    this.balls[id].color = color;
+  };
+
   private animate = (hitBallNum: number) => {
     if (this.canvas) {
       const ctx = this.canvas.getContext('2d');
@@ -217,7 +221,7 @@ export class Game {
   };
 
   // return mouse pos in x and y | вохвращает позицию мыши по x и y
-  private getMousePosition = (event: MouseEvent): Position => {
+  public getMousePosition = (event: MouseEvent | React.MouseEvent<HTMLCanvasElement>): Position => {
     const rect = this.canvas?.getBoundingClientRect();
     const x = event.clientX - (rect?.left || 0);
     const y = event.clientY - (rect?.top || 0);
@@ -226,7 +230,7 @@ export class Game {
 
   // check if ball clicked and if yes - returns it's id
   //проверяет был ли сделан клик по мячу и если да - возвращает его id
-  private checkIsBallClicked = (pos: Position): number | null => {
+  public checkIsBallClicked = (pos: Position): number | null => {
     let res = null;
     this.balls.forEach((ball, i) => {
       const xMax = ball.x + STANDART_CIRCLE_RADIUS;
