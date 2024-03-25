@@ -16,8 +16,9 @@ export type Ball = {
   vx: number;
   vy: number;
   radius: number;
-  color: string;
+  color: string | null;
   draw: () => void;
+  updateColor: (newColor: string) => void;
 };
 
 export type Position = {

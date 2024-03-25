@@ -24,11 +24,9 @@ export class Game {
       this.canvas.height = CANVAS_STANDART_HEIGHT;
       const ctx = this.canvas.getContext('2d');
       if (ctx) {
-        const x = 40;
-        const y = CANVAS_STANDART_HEIGHT / 3; // Centered canvas | оцентрировать холст
-
         this.balls = [];
-        this.drawBallsTriangle(x, y, STANDART_CIRCLE_RADIUS);
+        this.drawBallsTriangle();
+        this.balls.forEach((ball) => ball.draw());
 
         let hitBallNum: number | null = null;
         this.canvas.addEventListener('click', (e) => {
@@ -49,8 +47,9 @@ export class Game {
     }
   };
 
-  public changeBallColor = (color: string, id: number) => {
-    this.balls[id].color = color;
+  public changeBallColor = (id: number, color: string) => {
+    this.balls[id].updateColor(color);
+    this.balls[id].draw();
   };
 
   private animate = (hitBallNum: number) => {
@@ -124,12 +123,16 @@ export class Game {
 
         this.balls.forEach((ball) => ball.draw());
       }
+
       this.raf = window.requestAnimationFrame(() => this.animate(hitBallNum as number));
     }
   };
 
   // draws balls (15x) as billiard triangle | рисует шары (15шт) в форме бильярдного треугольника
-  private drawBallsTriangle = (x: number, y: number, radius: number) => {
+  private drawBallsTriangle = () => {
+    const x = 40;
+    const y = CANVAS_STANDART_HEIGHT / 3; // Centered canvas | оцентрировать холст
+    const radius = STANDART_CIRCLE_RADIUS;
     const ctx = this.canvas?.getContext('2d');
     const offsetX = STANDART_CIRCLE_RADIUS * 2.2;
     const offsetY = STANDART_CIRCLE_RADIUS * 2.2;
@@ -148,65 +151,44 @@ export class Game {
           vx: STANDART_X_VELOSITY + randomVilosity,
           vy: STANDART_Y_VELOSITY + randomVilosity,
           radius: radius,
-          color: '',
+          color: null,
+          updateColor: function (newColor: string) {
+            this.color = newColor;
+          },
           draw: function () {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
-            ctx.fillStyle = color;
+            ctx.fillStyle = this.color || '';
             ctx.fill();
           }
         };
         // calculate ball position and draw ball | вычислить положение шара и написовать его
-        ctx.beginPath();
         if (n <= firstRow) {
           ball.x = x;
           ball.y = y + offsetY * n;
-          ctx.arc(x, y + offsetY * n, radius, 0, 2 * Math.PI, false);
         }
         if (n > firstRow && n <= secondRow) {
-          ctx.arc(x + offsetX, y + offsetY * (n - firstRow - 0.4), radius, 0, 2 * Math.PI, false);
           ball.x = x + offsetX;
-          ball.y = y + (offsetY * (n - firstRow - 0.4) + x / 2);
+          ball.y = y + offsetY * (n - firstRow - 0.4);
         }
         if (n > secondRow && n <= thirdRow) {
-          ctx.arc(
-            x + offsetX + offsetX,
-            y + (offsetY * (n - secondRow - 0.8) + x / 2),
-            radius,
-            0,
-            2 * Math.PI,
-            false
-          );
           ball.x = x + offsetX + offsetX;
           ball.y = y + (offsetY * (n - secondRow - 0.8) + x / 2);
         }
         if (n > thirdRow && n <= fourRow) {
-          ctx.arc(
-            x + offsetX + offsetX + offsetX,
-            y + (offsetY * (n - thirdRow - 0.3) + x / 2),
-            radius,
-            0,
-            2 * Math.PI,
-            false
-          );
           ball.x = x + offsetX + offsetX + offsetX;
           ball.y = y + (offsetY * (n - thirdRow - 0.3) + x / 2);
         }
         if (n > fourRow) {
-          ctx.arc(
-            x + offsetX + offsetX + offsetX + offsetX,
-            y + (offsetY * (n - fourRow - 0.6) + x),
-            radius,
-            0,
-            2 * Math.PI,
-            false
-          );
           ball.x = x + offsetX + offsetX + offsetX + offsetX;
           ball.y = y + (offsetY * (n - fourRow - 0.6) + x);
         }
-        const color = getRandomColor();
-        ball.color = color;
-        ctx.fillStyle = color;
+        if (!ball.color) {
+          const color = getRandomColor();
+          ball.color = color;
+          ctx.fillStyle = color;
+        }
+        ctx.fillStyle = ball.color;
         ctx.fill();
 
         // add shadow  | добавить тень
